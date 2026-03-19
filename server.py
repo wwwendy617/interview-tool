@@ -311,15 +311,18 @@ class InterviewHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def log_message(self, format, *args):
-        pass  # Suppress default logging
+        import sys
+        sys.stderr.write("%s - - [%s] %s\n" % (self.client_address[0], self.log_date_time_string(), format % args))
+        sys.stderr.flush()
 
 
 if __name__ == '__main__':
     os.makedirs(DATA_DIR, exist_ok=True)
     if not os.path.exists(DATA_FILE):
         write_data([])
+    print(f'Starting server on port {PORT}...', flush=True)
     server = HTTPServer(('0.0.0.0', PORT), InterviewHandler)
-    print(f'访谈工具已启动: http://localhost:{PORT}')
+    print(f'Listening on 0.0.0.0:{PORT}', flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
