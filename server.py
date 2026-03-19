@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""品牌方AI营销采购访谈工具 - Python后端"""
+"""品牌方AI营销采购访谈工具 - Python后端 (Supabase 版)"""
 
 import json
 import os
@@ -10,17 +10,17 @@ import zipfile
 import xml.etree.ElementTree as ET
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 from datetime import datetime
 
 PORT = int(os.environ.get('PORT', '3000'))
-DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data'))
-# Fallback: if DATA_DIR is not writable (e.g. /data without disk), use /tmp
-try:
-    os.makedirs(DATA_DIR, exist_ok=True)
-except PermissionError:
-    DATA_DIR = os.path.join('/tmp', 'interview-data')
-DATA_FILE = os.path.join(DATA_DIR, 'interviews.json')
 PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public')
+
+# Supabase 配置
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
+SUPABASE_TABLE = 'interviews'
 
 QUESTION_LABELS = [
     'Q1 AI营销使用现状',
@@ -37,13 +37,66 @@ QUESTION_LABELS = [
     'Q12 给服务商的建议'
 ]
 
-def read_data():
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
+# ============ Supabase REST API 封装 ============
 
-def write_data(data):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+def _supabase_headers(prefer=None):
+    headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type': 'application/json',
+    }
+    if prefer:
+        headers['Prefer'] = prefer
+    return headers
+
+def _supabase_request(method, path, body=None, headers_extra=None):
+    url = f'{SUPABASE_URL}/rest/v1/{path}'
+    data = json.dumps(body, ensure_ascii=False).encode('utf-8') if body else None
+    headers = _supabase_headers()
+    if headers_extra:
+        headers.update(headers_extra)
+    req = Request(url, data=data, headers=headers, method=method)
+    try:
+        with urlopen(req) as resp:
+            raw = resp.read().decode('utf-8')
+            return json.loads(raw) if raw else None
+    except HTTPError as e:
+        error_body = e.read().decode('utf-8')
+        print(f'Supabase error: {e.code} {error_body}', flush=True)
+        raise
+
+def db_read_all():
+    """读取所有访谈记录"""
+    rows = _supabase_request('GET', f'{SUPABASE_TABLE}?select=*&order=created_at.desc')
+    return [row['data'] for row in rows] if rows else []
+
+def db_read_one(interview_id):
+    """读取单条记录"""
+    rows = _supabase_request('GET', f'{SUPABASE_TABLE}?interview_id=eq.{interview_id}&select=*')
+    if rows and len(rows) > 0:
+        return rows[0]['data']
+    return None
+
+def db_insert(interview):
+    """插入一条记录"""
+    row = {
+        'interview_id': interview['id'],
+        'data': interview,
+    }
+    _supabase_request('POST', SUPABASE_TABLE, body=row, headers_extra={'Prefer': 'return=minimal'})
+
+def db_update(interview_id, interview):
+    """更新一条记录"""
+    row = {
+        'data': interview,
+    }
+    _supabase_request('PATCH', f'{SUPABASE_TABLE}?interview_id=eq.{interview_id}', body=row, headers_extra={'Prefer': 'return=minimal'})
+
+def db_delete(interview_id):
+    """删除一条记录"""
+    _supabase_request('DELETE', f'{SUPABASE_TABLE}?interview_id=eq.{interview_id}')
+
+# ============ 导出相关 ============
 
 def build_rows(interviews):
     rows = []
@@ -89,7 +142,6 @@ def generate_xlsx(rows):
     def escape_xml(s):
         return str(s).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
 
-    # Build shared strings
     shared_strings = []
     ss_index = {}
     def get_ss_idx(val):
@@ -99,23 +151,19 @@ def generate_xlsx(rows):
             shared_strings.append(val)
         return ss_index[val]
 
-    # Pre-populate shared strings
     for col in columns:
         get_ss_idx(col)
     for row in rows:
         for col in columns:
             get_ss_idx(str(row.get(col, '')))
 
-    # sheet1.xml
     sheet_rows = []
-    # Header row
     cells = []
     for ci, col in enumerate(columns):
         ref = f'{col_letter(ci)}1'
         cells.append(f'<c r="{ref}" t="s" s="1"><v>{get_ss_idx(col)}</v></c>')
     sheet_rows.append(f'<row r="1">{"".join(cells)}</row>')
 
-    # Data rows
     for ri, row in enumerate(rows, start=2):
         cells = []
         for ci, col in enumerate(columns):
@@ -134,14 +182,12 @@ def generate_xlsx(rows):
 <sheetData>{"".join(sheet_rows)}</sheetData>
 </worksheet>'''
 
-    # sharedStrings.xml
     ss_items = ''.join(f'<si><t>{escape_xml(s)}</t></si>' for s in shared_strings)
     ss_xml = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="{len(shared_strings)}" uniqueCount="{len(shared_strings)}">
 {ss_items}
 </sst>'''
 
-    # styles.xml with header style
     styles_xml = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
 <fonts count="2">
@@ -161,14 +207,12 @@ def generate_xlsx(rows):
 </cellXfs>
 </styleSheet>'''
 
-    # workbook.xml
     workbook_xml = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
   xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 <sheets><sheet name="访谈记录" sheetId="1" r:id="rId1"/></sheets>
 </workbook>'''
 
-    # Relationships
     rels_xml = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
@@ -223,11 +267,11 @@ class InterviewHandler(SimpleHTTPRequestHandler):
         path = parsed.path
 
         if path == '/api/interviews':
-            self._json_response(read_data())
+            data = db_read_all()
+            self._json_response(data)
         elif path.startswith('/api/interviews/') and '/export' not in path:
             interview_id = path.split('/')[-1]
-            data = read_data()
-            item = next((d for d in data if d['id'] == interview_id), None)
+            item = db_read_one(interview_id)
             if item:
                 self._json_response(item)
             else:
@@ -235,7 +279,7 @@ class InterviewHandler(SimpleHTTPRequestHandler):
         elif path == '/api/export/xlsx':
             params = parse_qs(parsed.query)
             ids = params.get('ids', [''])[0].split(',') if 'ids' in params else None
-            data = read_data()
+            data = db_read_all()
             filtered = [d for d in data if ids is None or d['id'] in ids]
             rows = build_rows(filtered)
             xlsx_data = generate_xlsx(rows)
@@ -248,7 +292,7 @@ class InterviewHandler(SimpleHTTPRequestHandler):
         elif path == '/api/export/csv':
             params = parse_qs(parsed.query)
             ids = params.get('ids', [''])[0].split(',') if 'ids' in params else None
-            data = read_data()
+            data = db_read_all()
             filtered = [d for d in data if ids is None or d['id'] in ids]
             rows = build_rows(filtered)
             csv_data = generate_csv(rows).encode('utf-8')
@@ -264,15 +308,13 @@ class InterviewHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/api/interviews':
             body = self._read_body()
-            data = read_data()
             interview = {
                 'id': str(uuid.uuid4()),
                 'createdAt': datetime.now().isoformat(),
                 'updatedAt': datetime.now().isoformat(),
                 **body
             }
-            data.append(interview)
-            write_data(data)
+            db_insert(interview)
             self._json_response(interview)
         else:
             self._json_response({'error': 'Not found'}, 404)
@@ -281,12 +323,11 @@ class InterviewHandler(SimpleHTTPRequestHandler):
         if self.path.startswith('/api/interviews/'):
             interview_id = self.path.split('/')[-1]
             body = self._read_body()
-            data = read_data()
-            idx = next((i for i, d in enumerate(data) if d['id'] == interview_id), None)
-            if idx is not None:
-                data[idx] = {**data[idx], **body, 'updatedAt': datetime.now().isoformat()}
-                write_data(data)
-                self._json_response(data[idx])
+            existing = db_read_one(interview_id)
+            if existing:
+                updated = {**existing, **body, 'updatedAt': datetime.now().isoformat()}
+                db_update(interview_id, updated)
+                self._json_response(updated)
             else:
                 self._json_response({'error': 'Not found'}, 404)
         else:
@@ -295,9 +336,7 @@ class InterviewHandler(SimpleHTTPRequestHandler):
     def do_DELETE(self):
         if self.path.startswith('/api/interviews/'):
             interview_id = self.path.split('/')[-1]
-            data = read_data()
-            data = [d for d in data if d['id'] != interview_id]
-            write_data(data)
+            db_delete(interview_id)
             self._json_response({'success': True})
         else:
             self._json_response({'error': 'Not found'}, 404)
@@ -322,10 +361,11 @@ class InterviewHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    os.makedirs(DATA_DIR, exist_ok=True)
-    if not os.path.exists(DATA_FILE):
-        write_data([])
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        print('警告: 未配置 SUPABASE_URL 或 SUPABASE_KEY 环境变量', flush=True)
+        print('请设置环境变量后重新启动', flush=True)
     print(f'Starting server on port {PORT}...', flush=True)
+    print(f'Supabase: {SUPABASE_URL}', flush=True)
     server = HTTPServer(('0.0.0.0', PORT), InterviewHandler)
     print(f'Listening on 0.0.0.0:{PORT}', flush=True)
     try:
