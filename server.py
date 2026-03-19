@@ -14,6 +14,11 @@ from datetime import datetime
 
 PORT = int(os.environ.get('PORT', '3000'))
 DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data'))
+# Fallback: if DATA_DIR is not writable (e.g. /data without disk), use /tmp
+try:
+    os.makedirs(DATA_DIR, exist_ok=True)
+except PermissionError:
+    DATA_DIR = os.path.join('/tmp', 'interview-data')
 DATA_FILE = os.path.join(DATA_DIR, 'interviews.json')
 PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public')
 
