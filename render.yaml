@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: interview-tool
+    runtime: python
+    startCommand: python3 server.py
+    envVars:
+      - key: DATA_DIR
+        value: /data
+    disk:
+      name: interview-data
+      mountPath: /data
+      sizeGB: 1

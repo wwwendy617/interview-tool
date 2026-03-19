@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>访谈记录</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="index.html" class="back-link">&larr; 返回列表</a>
+      <h1>品牌方AI营销采购访谈</h1>
+      <div class="header-actions">
+        <span id="saveStatus" class="save-status"></span>
+        <button id="saveBtn" class="btn btn-primary" onclick="saveInterview()">保存</button>
+      </div>
+    </header>
+
+    <!-- 基本信息 -->
+    <section class="form-section">
+      <h2 class="section-title">基本信息</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>受访者姓名</label>
+          <input type="text" id="field-name" placeholder="姓名">
+        </div>
+        <div class="form-group">
+          <label>职位</label>
+          <input type="text" id="field-title" placeholder="CMO/品牌总监/市场经理">
+        </div>
+        <div class="form-group">
+          <label>公司</label>
+          <input type="text" id="field-company" placeholder="公司名称">
+        </div>
+        <div class="form-group">
+          <label>行业</label>
+          <input type="text" id="field-industry" placeholder="所属行业">
+        </div>
+        <div class="form-group">
+          <label>访谈日期</label>
+          <input type="date" id="field-date">
+        </div>
+        <div class="form-group">
+          <label>访谈时长</label>
+          <input type="text" id="field-duration" placeholder="如：45分钟">
+        </div>
+      </div>
+    </section>
+
+    <!-- 开场破冰 -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">开场破冰</h2>
+        <span class="section-time">5分钟</span>
+      </div>
+      <div class="icebreaker-script">
+        <p>"谢谢你抽时间。我们团队最近在研究AI对营销行业的影响，想从品牌方的视角听听真实的情况。这不是一次销售，纯粹是想向你请教。你的观点对我们理解行业非常有价值。"</p>
+        <p>可以先简单介绍一下你现在负责的业务和团队情况吗？</p>
+      </div>
+    </section>
+
+    <!-- Part 1 -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Part 1：AI营销现状与体验</h2>
+        <span class="section-time">10-15分钟</span>
+      </div>
+      <p class="section-goal">核心目标：了解品牌方的AI采用真实现状、价值感知和困境</p>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q1</span>
+          <p class="question-text">你们团队现在在营销工作中用AI吗？具体用在哪些环节？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>是团队自己在用工具，还是让服务商/代理商用？</li>
+            <li>用的是平台自带的AI工具（擎舵/万相台）还是第三方产品？</li>
+            <li>大概是从什么时候开始用的？</li>
+          </ul>
+        </details>
+        <div class="design-intent">校验88%采用率数据在中国市场的真实性；区分"自用工具"vs"采购服务"</div>
+        <textarea id="answer-0" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q2</span>
+          <p class="question-text">用了AI之后，你觉得最明显的变化是什么？有没有让你觉得"这个真的有用"的时刻？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>如果有失望的经历也可以说说？</li>
+            <li>具体哪个环节节省了最多时间/钱？哪个环节AI还不行？</li>
+          </ul>
+        </details>
+        <div class="design-intent">校验"26%价值兑现"的gap原因——是工具问题、能力问题还是期待管理问题？</div>
+        <textarea id="answer-1" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q3</span>
+          <p class="question-text">你们用AI做的内容，发出去之后效果怎么样？有没有遇到过"翻车"的情况？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>有没有被平台限流或处罚过？</li>
+            <li>消费者能感知到这是AI生成的内容吗？他们的反应是什么？</li>
+            <li>315 AI投毒事件之后，你们内部对AI内容的态度有变化吗？</li>
+          </ul>
+        </details>
+        <div class="design-intent">校验P11信任折扣在品牌方的感知；315后品牌方合规态度</div>
+        <textarea id="answer-2" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+    </section>
+
+    <!-- Part 2 -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Part 2：采购决策与痛点</h2>
+        <span class="section-time">10-15分钟</span>
+      </div>
+      <p class="section-goal">核心目标：理解品牌方如何决定"买不买AI营销服务"、"买谁的"、"花多少钱"</p>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q4</span>
+          <p class="question-text">如果现在要采购一个AI营销服务，这个决策在你们公司内部是怎么走的？谁拍板？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>营销部自己能定，还是需要IT/采购/老板审批？</li>
+            <li>大概从"想用"到"真正买了"要多久？</li>
+            <li>有没有"想买但最后没买"的经历？卡在哪了？</li>
+          </ul>
+        </details>
+        <div class="design-intent">直接填充"品牌方采购决策链"空白；ICC销售策略设计基础</div>
+        <textarea id="answer-3" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q5</span>
+          <p class="question-text">你们的AI营销相关预算是从哪里来的？是新增预算还是从别的地方调过来的？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>大概占营销总预算的多少？</li>
+            <li>明年这个比例会增加吗？</li>
+            <li>有没有因为用AI而减少了对代理商/服务商的花费？</li>
+          </ul>
+        </details>
+        <div class="design-intent">校验"加AI+减外包"趋势；了解AI预算在品牌方内部的定位</div>
+        <textarea id="answer-4" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q6</span>
+          <p class="question-text">你们在评估AI营销服务商的时候，最看重什么？什么会让你忽然"想试试"，什么会让你立刻拒绝？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>效果数据、价格、服务态度、行业经验、合规能力——排个序的话？</li>
+            <li>有没有什么是"没这个我就不考虑"的硬条件？</li>
+          </ul>
+        </details>
+        <div class="design-intent">ICC的产品功能优先级和销售话术设计</div>
+        <textarea id="answer-5" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q7</span>
+          <p class="question-text">你们有没有考虑过自己建一个AI营销团队或用OpenClaw这类工具自己做？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>如果考虑过，为什么最后没做/做了？</li>
+            <li>什么情况下你们会觉得"还是找外部服务商更好"？</li>
+            <li>"自建"最大的障碍是什么？</li>
+          </ul>
+        </details>
+        <div class="design-intent">直接校验P09（品牌方自建）和产品假设#7</div>
+        <textarea id="answer-6" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+    </section>
+
+    <!-- Part 3 -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Part 3：品牌建设与意义感知</h2>
+        <span class="section-time">10-15分钟</span>
+      </div>
+      <p class="section-goal">核心目标：探索品牌方对"意义建构"和"品牌叙事"的认知和付费意愿</p>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q8</span>
+          <p class="question-text">你觉得在现在这个环境下，"品牌"这个东西对你们来说意味着什么？它的重要性相比前几年是在上升还是在下降？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>你们今年在"品牌建设"上的投入相比去年有变化吗？</li>
+            <li>"品牌建设"和"效果投放"之间，你们内部怎么平衡？</li>
+          </ul>
+        </details>
+        <div class="design-intent">校验"品牌向+5pp"数据；探测信任轨的市场空间</div>
+        <textarea id="answer-7" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q9</span>
+          <p class="question-text">如果有一个AI工具能告诉你"消费者现在到底在乎你们品牌的什么、用什么语言谈论你们"，这个对你有价值吗？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>你们现在怎么了解消费者对品牌的感知？主要靠什么渠道？</li>
+            <li>如果这个洞察能做到实时更新（而不是半年一次调研报告），你愿意为它付费吗？</li>
+          </ul>
+        </details>
+        <div class="design-intent">核心问题：信任轨的"意义信号捕获"能力是否有市场付费意愿</div>
+        <textarea id="answer-8" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q10</span>
+          <p class="question-text">你们会为"品牌策略/品牌叙事"这类服务单独付费吗？还是觉得它应该是"执行服务"的一部分？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>你们现在有没有单独采购"品牌策略"类服务？花多少？</li>
+            <li>如果一个服务商既能帮你做AI内容执行，又能帮你做品牌叙事策略，你会更愿意找这样的还是分开找？</li>
+          </ul>
+        </details>
+        <div class="design-intent">直接影响ICC双轨商业模式的可行性</div>
+        <textarea id="answer-9" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+    </section>
+
+    <!-- Part 4 -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Part 4：未来展望</h2>
+        <span class="section-time">5分钟</span>
+      </div>
+      <p class="section-goal">核心目标：捕捉品牌方对未来的前瞻性判断</p>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q11</span>
+          <p class="question-text">你觉得1-2年后，AI在你们营销工作中的角色会变成什么样？</p>
+        </div>
+        <details class="follow-up">
+          <summary>追问提示</summary>
+          <ul>
+            <li>你最期待AI帮你解决的一个问题是什么？</li>
+            <li>你最担心AI带来的一个风险是什么？</li>
+          </ul>
+        </details>
+        <div class="design-intent">捕捉品牌方的前瞻性判断，为情景推演提供"客户视角"的补充</div>
+        <textarea id="answer-10" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+
+      <div class="question-block">
+        <div class="question-header">
+          <span class="question-num">Q12</span>
+          <p class="question-text">如果你要给AI营销服务商提一个建议——"你们如果能做到XX，我肯定买"——你会说什么？</p>
+        </div>
+        <div class="design-intent">开放式结尾"金句"，往往能收获最真实的需求表达</div>
+        <textarea id="answer-11" class="answer-box" rows="5" placeholder="记录回答..."></textarea>
+      </div>
+    </section>
+
+    <!-- 收尾 -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">收尾</h2>
+        <span class="section-time">2分钟</span>
+      </div>
+      <div class="icebreaker-script">
+        <p>"非常感谢你的时间和分享，对我们帮助很大。后续如果我们有了一些新的发现，可以找你聊聊吗？"</p>
+        <p><strong>开放门：</strong>保持关系，为后续深度访谈或客户转化留入口。</p>
+      </div>
+    </section>
+
+    <!-- 附录：访谈记录模板 -->
+    <section class="form-section summary-section">
+      <h2 class="section-title">访谈总结（访谈后24h内填写）</h2>
+
+      <div class="form-group">
+        <label>AI成熟度分层</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="maturity" value="L0观望"> <span class="radio-tag" style="background:#9e9e9e">L0 观望</span></label>
+          <label class="radio-label"><input type="radio" name="maturity" value="L1尝鲜"> <span class="radio-tag" style="background:#ff9800">L1 尝鲜</span></label>
+          <label class="radio-label"><input type="radio" name="maturity" value="L2局部采用"> <span class="radio-tag" style="background:#2196f3">L2 局部采用</span></label>
+          <label class="radio-label"><input type="radio" name="maturity" value="L3体系化"> <span class="radio-tag" style="background:#4caf50">L3 体系化</span></label>
+          <label class="radio-label"><input type="radio" name="maturity" value="L4 AI原生"> <span class="radio-tag" style="background:#9c27b0">L4 AI原生</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>核心发现（3条）</label>
+        <input type="text" id="field-finding-0" placeholder="核心发现 1">
+        <input type="text" id="field-finding-1" placeholder="核心发现 2" style="margin-top:8px">
+        <input type="text" id="field-finding-2" placeholder="核心发现 3" style="margin-top:8px">
+      </div>
+
+      <div class="form-group">
+        <label>P12校验信号</label>
+        <select id="field-p12Signal">
+          <option value="">请选择</option>
+          <option value="支持体系化">支持体系化</option>
+          <option value="支持尝鲜">支持尝鲜</option>
+          <option value="中性">中性</option>
+          <option value="反对">反对</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>对ICC的启示</label>
+        <textarea id="field-iccInsight" rows="3" placeholder="对ICC产品设计的启示..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>意外洞察</label>
+        <textarea id="field-surprise" rows="3" placeholder="计划外的有价值发现..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>后续跟进</label>
+        <textarea id="field-followUp" rows="3" placeholder="后续行动计划..."></textarea>
+      </div>
+    </section>
+
+    <div class="form-footer">
+      <a href="index.html" class="btn btn-outline">返回列表</a>
+      <button class="btn btn-primary btn-lg" onclick="saveInterview()">保存访谈记录</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('id');
+
+    // Set today's date as default
+    document.getElementById('field-date').value = new Date().toISOString().slice(0, 10);
+
+    // Load existing interview if editing
+    if (editId) {
+      loadInterview(editId);
+    }
+
+    async function loadInterview(id) {
+      const iv = await api.getOne(id);
+      if (!iv) return;
+
+      document.getElementById('field-name').value = iv.name || '';
+      document.getElementById('field-title').value = iv.title || '';
+      document.getElementById('field-company').value = iv.company || '';
+      document.getElementById('field-industry').value = iv.industry || '';
+      document.getElementById('field-date').value = iv.date || '';
+      document.getElementById('field-duration').value = iv.duration || '';
+
+      // Load answers
+      if (iv.answers) {
+        iv.answers.forEach((ans, i) => {
+          const el = document.getElementById(`answer-${i}`);
+          if (el) el.value = ans || '';
+        });
+      }
+
+      // Load summary fields
+      if (iv.maturity) {
+        const radio = document.querySelector(`input[name="maturity"][value="${iv.maturity}"]`);
+        if (radio) radio.checked = true;
+      }
+      if (iv.findings) {
+        iv.findings.forEach((f, i) => {
+          const el = document.getElementById(`field-finding-${i}`);
+          if (el) el.value = f || '';
+        });
+      }
+      document.getElementById('field-p12Signal').value = iv.p12Signal || '';
+      document.getElementById('field-iccInsight').value = iv.iccInsight || '';
+      document.getElementById('field-surprise').value = iv.surprise || '';
+      document.getElementById('field-followUp').value = iv.followUp || '';
+    }
+
+    function collectData() {
+      const maturityRadio = document.querySelector('input[name="maturity"]:checked');
+      return {
+        name: document.getElementById('field-name').value,
+        title: document.getElementById('field-title').value,
+        company: document.getElementById('field-company').value,
+        industry: document.getElementById('field-industry').value,
+        date: document.getElementById('field-date').value,
+        duration: document.getElementById('field-duration').value,
+        answers: Array.from({ length: 12 }, (_, i) =>
+          document.getElementById(`answer-${i}`)?.value || ''
+        ),
+        maturity: maturityRadio ? maturityRadio.value : '',
+        findings: [
+          document.getElementById('field-finding-0').value,
+          document.getElementById('field-finding-1').value,
+          document.getElementById('field-finding-2').value
+        ],
+        p12Signal: document.getElementById('field-p12Signal').value,
+        iccInsight: document.getElementById('field-iccInsight').value,
+        surprise: document.getElementById('field-surprise').value,
+        followUp: document.getElementById('field-followUp').value
+      };
+    }
+
+    async function saveInterview() {
+      const data = collectData();
+      const statusEl = document.getElementById('saveStatus');
+
+      try {
+        if (editId) {
+          await api.update(editId, data);
+        } else {
+          const result = await api.create(data);
+          // Update URL to edit mode so subsequent saves update instead of create
+          window.history.replaceState({}, '', `interview.html?id=${result.id}`);
+          window.editId = result.id;
+        }
+        statusEl.textContent = '已保存';
+        statusEl.className = 'save-status saved';
+        setTimeout(() => { statusEl.textContent = ''; }, 2000);
+      } catch (e) {
+        statusEl.textContent = '保存失败';
+        statusEl.className = 'save-status error';
+      }
+    }
+
+    // Auto-save every 30 seconds
+    setInterval(() => {
+      const currentId = editId || window.editId;
+      if (currentId) {
+        const data = collectData();
+        api.update(currentId, data).then(() => {
+          const s = document.getElementById('saveStatus');
+          s.textContent = '自动保存';
+          s.className = 'save-status saved';
+          setTimeout(() => { s.textContent = ''; }, 1500);
+        });
+      }
+    }, 30000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>品牌方AI营销采购访谈工具</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>品牌方AI营销采购访谈工具</h1>
+      <p class="subtitle">AI营销变局研究库 · ICC产品团队</p>
+    </header>
+
+    <div class="toolbar">
+      <a href="interview.html" class="btn btn-primary">+ 新建访谈</a>
+      <div class="toolbar-right">
+        <button id="selectAllBtn" class="btn btn-outline">全选</button>
+        <button id="exportXlsxBtn" class="btn btn-success" disabled>导出 Excel</button>
+        <button id="exportCsvBtn" class="btn btn-success" disabled>导出 CSV</button>
+      </div>
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <div class="empty-icon">📋</div>
+      <p>暂无访谈记录</p>
+      <a href="interview.html" class="btn btn-primary">开始第一次访谈</a>
+    </div>
+
+    <div id="interviewList" class="card-grid"></div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let allSelected = false;
+
+    async function loadList() {
+      const interviews = await api.getAll();
+      const list = document.getElementById('interviewList');
+      const empty = document.getElementById('emptyState');
+
+      if (interviews.length === 0) {
+        list.style.display = 'none';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+      list.style.display = 'grid';
+
+      const maturityColors = {
+        'L0观望': '#9e9e9e',
+        'L1尝鲜': '#ff9800',
+        'L2局部采用': '#2196f3',
+        'L3体系化': '#4caf50',
+        'L4 AI原生': '#9c27b0'
+      };
+
+      list.innerHTML = interviews.map(iv => `
+        <div class="card" data-id="${iv.id}">
+          <div class="card-header">
+            <label class="checkbox-wrapper" onclick="event.stopPropagation()">
+              <input type="checkbox" class="interview-check" value="${iv.id}" onchange="updateExportBtns()">
+            </label>
+            <div class="card-info" onclick="location.href='interview.html?id=${iv.id}'">
+              <h3>${iv.name || '未命名'}</h3>
+              <span class="card-company">${iv.company || ''} ${iv.title ? '· ' + iv.title : ''}</span>
+            </div>
+            <button class="btn-icon btn-delete" onclick="event.stopPropagation(); deleteInterview('${iv.id}')" title="删除">✕</button>
+          </div>
+          <div class="card-body" onclick="location.href='interview.html?id=${iv.id}'">
+            <div class="card-meta">
+              <span class="tag" style="background:${maturityColors[iv.maturity] || '#9e9e9e'}">${iv.maturity || '未分层'}</span>
+              <span class="card-date">${iv.date || '未填日期'}</span>
+            </div>
+            ${iv.findings && iv.findings.filter(Boolean).length > 0 ?
+              `<div class="card-findings">
+                ${iv.findings.filter(Boolean).map(f => `<p>· ${f}</p>`).join('')}
+              </div>` : ''
+            }
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateExportBtns() {
+      const checked = document.querySelectorAll('.interview-check:checked');
+      document.getElementById('exportXlsxBtn').disabled = checked.length === 0;
+      document.getElementById('exportCsvBtn').disabled = checked.length === 0;
+    }
+
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+      allSelected = !allSelected;
+      document.querySelectorAll('.interview-check').forEach(cb => cb.checked = allSelected);
+      document.getElementById('selectAllBtn').textContent = allSelected ? '取消全选' : '全选';
+      updateExportBtns();
+    });
+
+    function getSelectedIds() {
+      return Array.from(document.querySelectorAll('.interview-check:checked')).map(cb => cb.value);
+    }
+
+    document.getElementById('exportXlsxBtn').addEventListener('click', () => {
+      const ids = getSelectedIds();
+      if (ids.length) window.location.href = `/api/export/xlsx?ids=${ids.join(',')}`;
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      const ids = getSelectedIds();
+      if (ids.length) window.location.href = `/api/export/csv?ids=${ids.join(',')}`;
+    });
+
+    async function deleteInterview(id) {
+      if (!confirm('确定删除这条访谈记录吗？')) return;
+      await api.delete(id);
+      loadList();
+    }
+
+    loadList();
+  </script>
+</body>
+</html>
